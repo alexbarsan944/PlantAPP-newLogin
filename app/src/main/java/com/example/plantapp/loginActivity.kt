@@ -1,28 +1,29 @@
 package com.example.plantapp
 
-import android.content.Context
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.nfc.Tag
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.Color
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.SignInButton
 import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
+import androidx.appcompat.widget.Toolbar
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.android.synthetic.main.activity_login.*
+import java.lang.reflect.Field
 
 
 class loginActivity : AppCompatActivity() {
@@ -53,7 +54,21 @@ class loginActivity : AppCompatActivity() {
         lateinit var authent: FirebaseAuth
         lateinit var listenerState: FirebaseAuth.AuthStateListener
 
+        //setColor to SIGN IN
+        val mText="Don't have  an account? Sign up"
+        val mSpannableString = SpannableString(mText)
+        val mGreen = ForegroundColorSpan(Color.parseColor("#1B5E20"))
+        mSpannableString.setSpan(mGreen, 23, 31, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        textView.text = mSpannableString
 
+        //set toolbar
+        val toolbar = findViewById(R.id.toolbar) as Toolbar?
+        setSupportActionBar(toolbar)
+        toolbar?.title = "Log in"
+        toolbar?.navigationIcon = ContextCompat.getDrawable(this,R.drawable.ic_menu_black_24dp)
+        toolbar?.setNavigationOnClickListener {
+            Toast.makeText(applicationContext,"Navigation icon was clicked",Toast.LENGTH_SHORT).show()
+        }
 
         authent = FirebaseAuth.getInstance()
         emailID = findViewById(R.id.editText3)
@@ -63,23 +78,23 @@ class loginActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
 
 
-        listenerState = FirebaseAuth.AuthStateListener() {
+        listenerState = FirebaseAuth.AuthStateListener {
 
             fun onAuthStateChanged(fireAuth: FirebaseAuth) {
 
-                var user: FirebaseUser? = authent.getCurrentUser()
+                var user: FirebaseUser? = authent.currentUser
                 if (user != null) {
                     Toast.makeText(this@loginActivity, "You are logged in!", Toast.LENGTH_SHORT)
-                        .show();
+                        .show()
 
                 } else {
-                    Toast.makeText(this@loginActivity, "Please login!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this@loginActivity, "Please login!", Toast.LENGTH_SHORT).show()
 
                 }
 
             }
 
-        };
+        }
 
         buttonSignIn.setOnClickListener(View.OnClickListener { it: View? ->
 
@@ -90,12 +105,12 @@ class loginActivity : AppCompatActivity() {
             var pwd: String = password.text.toString()
 
             if (email.isEmpty()) {
-                emailID.setError("Please enter email id");
-                emailID.requestFocus();
+                emailID.error = "Please enter email id"
+                emailID.requestFocus()
             } else if (pwd.isEmpty()) {
 
-                password.setError("Please enter your password");
-                password.requestFocus();
+                password.error = "Please enter your password"
+                password.requestFocus()
 
             } else if (email.isEmpty() && pwd.isEmpty()) {
                 Toast.makeText(this@loginActivity, "Fields are empty", Toast.LENGTH_SHORT).show()
@@ -108,10 +123,10 @@ class loginActivity : AppCompatActivity() {
                             Log.d("logare", "logat cu success!")
                             Toast.makeText(
                                 this@loginActivity,
-                                "Login succesfully ...",
+                                "Logged in succesfully",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            val user = authent.currentUser;
+                            val user = authent.currentUser
                             //updateUI(user);
                         } else {
                             Toast.makeText(
@@ -143,18 +158,17 @@ class loginActivity : AppCompatActivity() {
                 signIn()
               //  FirebaseAuth.getInstance().signOut()
         })
-
-
     }
+
 
     private fun signIn() {
         var signInIntent:Intent  = googleClientSignIN.signInIntent
         startActivityForResult(signInIntent, RC_SIGN_IN)
     }
 
+    @SuppressLint("WrongViewCast")
     public override  fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-
         // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(data)
@@ -215,7 +229,7 @@ class loginActivity : AppCompatActivity() {
             val account = GoogleSignIn.getLastSignedInAccount(applicationContext)
 
             if (account != null) {
-                var personName = account.displayName;
+                var personName = account.displayName
                 var personGivenName = account.givenName
                 var personFamily = account.familyName
                 var personEmail = account.email
@@ -228,7 +242,6 @@ class loginActivity : AppCompatActivity() {
 
         }
 
-
-
 }
+
 
